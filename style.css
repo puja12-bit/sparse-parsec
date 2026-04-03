@@ -1,0 +1,209 @@
+:root {
+    --bg-color: #0b0f19;
+    --text-primary: #00ffcc;
+    --text-warning: #ffaa00;
+    --text-danger: #ff0044;
+    --text-success: #00ff00;
+    --accent: #5500ff;
+    --hud-bg: rgba(11, 15, 25, 0.8);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #000;
+    color: var(--text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#game-container {
+    position: relative;
+    width: 600px;
+    height: 800px;
+    max-width: 100vw;
+    max-height: 100vh;
+    background-color: #111;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass through to child elements */
+    display: flex;
+    flex-direction: column;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--hud-bg);
+    pointer-events: auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+h1 {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 10px currentColor;
+}
+
+h1.red { color: var(--text-danger); }
+h1.green { color: var(--text-success); }
+
+h2 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+    color: var(--text-warning);
+}
+
+p {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.instructions {
+    margin: 2rem 0;
+    border: 1px solid var(--text-primary);
+    padding: 1rem;
+    background-color: rgba(0, 255, 204, 0.1);
+}
+
+.warning {
+    color: var(--text-warning);
+    font-weight: bold;
+}
+
+button {
+    background-color: transparent;
+    border: 2px solid var(--text-primary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+button:hover {
+    background-color: var(--text-primary);
+    color: var(--bg-color);
+    box-shadow: 0 0 15px var(--text-primary);
+}
+
+.dest-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* In-Game HUD */
+#hud-screen {
+    background: transparent;
+    pointer-events: none;
+    justify-content: space-between;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to bottom, var(--hud-bg), transparent);
+    font-size: 1.5rem;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.hud-indicators {
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2rem;
+}
+
+.indicator-hud {
+    font-size: 2rem;
+    opacity: 0.2;
+    transition: opacity 0.1s;
+}
+
+.indicator-hud.active {
+    opacity: 1;
+    color: var(--text-warning);
+    text-shadow: 0 0 15px var(--text-warning);
+    animation: blink 0.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
+#messages-area {
+    position: absolute;
+    top: 30%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.floating-message {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-warning);
+    text-shadow: 0 0 5px #000;
+    animation: floatUp 2s forwards;
+    pointer-events: none;
+}
+
+.floating-message.penalty {
+    color: var(--text-danger);
+}
+
+.floating-message.bonus {
+    color: var(--text-success);
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
