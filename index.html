@@ -150,6 +150,8 @@
                 
                 <div class="btn-group" id="vehicle-list"></div>
                 
+                <div id="garage-progression-feedback" style="text-align:center; font-size:0.7rem; color:#aaa; margin:1rem 0; border:1px solid #333; padding: 1rem;"></div>
+                
                 <hr style="width: 80%; border-color:#333; margin: 1rem 0;">
                 
                 <h2>MAP PROGRESSION</h2>
@@ -186,15 +188,23 @@
 
             <div id="game-over-screen" class="screen hidden" style="justify-content:center;">
                 <h1 class="red" style="font-size: 2rem;">WASTED!</h1>
-                <p id="game-over-reason" style="color:#ff0055; margin: 2rem 0; font-size: 1rem; line-height:1.5; text-shadow:0 0 10px #ff0055; text-align:center;"></p>
+                <p id="game-over-reason" style="color:#ff0055; margin: 1rem 0; font-size: 1rem; line-height:1.5; text-shadow:0 0 10px #ff0055; text-align:center;"></p>
+                <div id="game-over-stats" style="text-align:left; font-size:0.7rem; margin-bottom:1rem; color:#aaa; max-width: 400px; padding: 1rem; border: 1px solid #333; background: #111; line-height: 1.8;"></div>
                 <p class="center-p">PTS EARNED: <span id="final-score" style="color:#00ffff"></span></p>
-                <button id="btn-restart" style="margin-top: 2rem;">RETURN</button>
+                <div class="btn-group" style="margin-top: 2rem;">
+                    <button id="btn-restart-retry">TRY AGAIN</button>
+                    <button id="btn-restart-menu">PLAY BETTER ROUTE</button>
+                </div>
             </div>
             
             <div id="level-complete-screen" class="screen hidden" style="justify-content:center;">
                 <h1 class="green" style="font-size: 1.5rem;">ARRIVED</h1>
+                <div id="win-stats" style="text-align:left; font-size:0.7rem; margin:1rem 0; color:#aaa; max-width: 400px; padding: 1rem; border: 1px solid #333; background: #111; line-height: 1.8;"></div>
                 <p class="center-p">PTS EARNED: <span id="win-score" style="color:#00ffff"></span></p>
-                <button id="btn-next" style="margin-top: 1rem;">RETURN</button>
+                <div class="btn-group" style="margin-top: 2rem;">
+                    <button id="btn-next-retry">PLAY AGAIN</button>
+                    <button id="btn-next-menu">ROUTES / UPGRADES</button>
+                </div>
             </div>
         </div>
     </div>
@@ -310,13 +320,13 @@
         const VEHICLES = [
             { id: 'hjonda', tier: 'BIKE', name: 'HJONDA SPLENDER', cost: 0, s: 12, a: 0.1, sp: SPRITES.bike, w:10, h:16 },
             { id: 'bullett', tier: 'BIKE', name: 'BULLETT ENFIELD', cost: 500, s: 14, a: 0.08, sp: SPRITES.bike, w:10, h:18 },
-            { id: 'hindo', tier: 'CAR', name: 'HINDO I20', cost: 3000, s: 15, a: 0.15, sp: SPRITES.bwm, w:20, h:36 },
-            { id: 'bwm', tier: 'CAR', name: 'BWM M-SERIES', cost: 6000, s: 22, a: 0.25, sp: SPRITES.bwm, w:24, h:40 }
+            { id: 'hindo', tier: 'CAR', name: 'HINDO I20', cost: 5000, s: 15, a: 0.15, sp: SPRITES.bwm, w:20, h:36 },
+            { id: 'bwm', tier: 'CAR', name: 'BWM M-SERIES', cost: 12000, s: 22, a: 0.25, sp: SPRITES.bwm, w:24, h:40 }
         ];
 
         const MAPS = [
             { id: 'hyderabad', name: 'HYDERABAD BLOCKS', unlockCost: 0, levelReq: 0 },
-            { id: 'highway', name: 'NATIONAL HIGHWAY', unlockCost: 4000, levelReq: 1 }
+            { id: 'highway', name: 'NATIONAL HIGHWAY', unlockCost: 5000, levelReq: 1 }
         ];
 
         function saveProgress() {
@@ -337,6 +347,31 @@
                     if(e.key==='e' || e.key==='E') { this.ind.r = !this.ind.r; this.ind.l = false; this.updateUIIndicators(); }
                 });
                 window.addEventListener('keyup', e => { this.keys[e.key] = false; });
+
+                this.lastTap = { l: 0, r: 0 };
+                window.addEventListener('touchstart', e => {
+                    if (!this.isPlaying) return;
+                    for (let i = 0; i < e.touches.length; i++) {
+                        const touch = e.touches[i];
+                        const now = performance.now();
+                        if (touch.clientX < window.innerWidth / 2) {
+                            if (now - this.lastTap.l < 300) {
+                                this.ind.l = !this.ind.l; this.ind.r = false; this.updateUIIndicators();
+                                this.lastTap.l = 0;
+                            } else {
+                                this.lastTap.l = now;
+                            }
+                        } else {
+                            if (now - this.lastTap.r < 300) {
+                                this.ind.r = !this.ind.r; this.ind.l = false; this.updateUIIndicators();
+                                this.lastTap.r = 0;
+                            } else {
+                                this.lastTap.r = now;
+                            }
+                        }
+                    }
+                }, { passive: true });
+
                 this.isPlaying = false; this.boundLoop = this.loop.bind(this);
             }
 
@@ -358,10 +393,17 @@
                 this.lights = { timer: 5000, state: 'green', block: 4000 };
                 this.env = []; this.envSpawnTimer = 0;
                 this.lastTime = performance.now();
-                this.strikes = 0; this.laneStrikes = 0; this.idleTime = 0;
+                this.strikes = 0; this.laneStrikes = 0; this.idleTime = 0; this.slowTime = 0;
+                this.stats = { indicatorMisses: 0, laneViolations: 0, signalViolations: 0, nearMisses: 0 };
                 document.getElementById('strike-ui').innerText = '';
                 document.getElementById('lane-strike-ui').innerText = '';
                 this.updateUIIndicators();
+                
+                if (('ontouchstart' in window || navigator.maxTouchPoints > 0) && !this.mobileHintShown) {
+                    this.mobileHintShown = true;
+                    setTimeout(() => { this.msg("Double tap left/right for indicator"); }, 500);
+                }
+                
                 requestAnimationFrame(this.boundLoop);
             }
 
@@ -369,8 +411,27 @@
                 this.isPlaying = false;
                 GLOBAL_SCORE += Math.floor(this.score); saveProgress();
                 document.getElementById('hud-screen').classList.add('hidden');
+                
+                const lostPts = (this.stats.indicatorMisses * 5) + (this.stats.laneViolations * 20) + (this.stats.signalViolations * 50);
+                let advice = "";
+                if (this.stats.indicatorMisses > 0) advice += `Missed ${this.stats.indicatorMisses} indicators &rarr; +${this.stats.indicatorMisses * 5} possible points lost.<br>`;
+                if (this.stats.laneViolations > 0) advice += `Lane violations &rarr; +${this.stats.laneViolations * 20} possible points lost.<br>`;
+                if (this.stats.signalViolations > 0) advice += `Skipped ${this.stats.signalViolations} signals &rarr; +${this.stats.signalViolations * 50} possible points lost.<br>`;
+                if (lostPts > 0) advice += `<br><span style="color:#ffaa00">Improve your score by ${lostPts}+ points next run!</span>`;
+                else advice += `<br><span style="color:#00ff66">Flawless safe driving!</span>`;
+
+                const statHtml = `
+                    <b>PERFORMANCE SUMMARY:</b><br>
+                    - Indicators Missed: ${this.stats.indicatorMisses}<br>
+                    - Lane Violations: ${this.stats.laneViolations}<br>
+                    - Signal Violations: ${this.stats.signalViolations}<br>
+                    - Near Misses: ${this.stats.nearMisses}<br><br>
+                    ${advice}
+                `;
+                
                 document.getElementById('game-over-screen').classList.remove('hidden');
                 document.getElementById('game-over-reason').innerText = reason;
+                document.getElementById('game-over-stats').innerHTML = statHtml;
                 document.getElementById('final-score').innerText = Math.floor(this.score);
             }
 
@@ -403,6 +464,7 @@
                 const doc = document.getElementById('game-container');
                 doc.classList.add('flash-violation');
                 this.laneStrikes++;
+                this.stats.laneViolations++;
                 if (this.laneStrikes === 1) { this.addScore(-20, "LANE VIOLATION 1/3"); document.getElementById('lane-strike-ui').innerText = 'LANE VIOLATION: 1/3 WARNING';}
                 else if (this.laneStrikes === 2) { this.addScore(-50, "LANE VIOLATION 2/3"); document.getElementById('lane-strike-ui').innerText = 'LANE VIOLATION: 2/3 FINAL WARNING'; }
                 else if (this.laneStrikes >= 3) { return this.stop("EXCEEDED LANE VIOLATIONS"); }
@@ -439,13 +501,21 @@
                             if (st !== 0 && !this.sf) {
                                 this.sf = true;
                                 if((st===-1 && this.ind.l) || (st===1 && this.ind.r)) this.addScore(10, "SAFE LANE CHG");
-                                else this.addScore(-5, "NO SIGNAL TURN");
+                                else { this.addScore(-5, "NO SIGNAL TURN"); this.stats.indicatorMisses++; }
                             }
                         }
                     }
                 }
                 if (st === 0) this.sf = false;
                 if(p.x < 150) p.x=150; if(p.x > 450) p.x=450;
+                
+                if (p.speed > this.vConf.s * 0.8) {
+                    this.score += 2 * (dt/1000); // passive trickle for efficient speed
+                }
+                if (p.speed < 2 && p.speed > 0) {
+                    this.slowTime += dt;
+                    if (this.slowTime > 2500) { this.addScore(-1, "DRIVING TOO SLOW"); this.slowTime = 0; }
+                } else { this.slowTime = 0; }
 
                 this.lights.timer -= dt;
                 if(this.lights.timer <= 0) {
@@ -468,6 +538,7 @@
                 if (distToLight < 20 && p.speed > 2 && this.lights.state === 'red') { 
                     if(!this.rp) {
                         this.strikes++;
+                        this.stats.signalViolations++;
                         if (this.strikes === 1) { this.addScore(-20, "SIGNAL VIOLATION 1/3"); document.getElementById('strike-ui').innerText = 'VIOLATION: 1/3 WARNING';}
                         else if (this.strikes === 2) { this.addScore(-50, "SIGNAL VIOLATION 2/3"); document.getElementById('strike-ui').innerText = 'VIOLATION: 2/3 FINAL WARNING'; }
                         else if (this.strikes >= 3) { return this.stop("EXCEEDED SIGNAL VIOLATIONS"); }
@@ -534,11 +605,21 @@
                     let rh = e.t==='v'? (e.h*2)*0.8 : (e.t==='p'? e.h*2 : e.h*2.5)*0.8;
 
                     let er = { l: e.x - rw/2, r: e.x + rw/2, t: sy - rh/2, b: sy + rh/2 };
-                    if(!(er.l > pr.r || er.r < pr.l || er.t > pr.b || er.b < pr.t)) {
-                        if(e.t === 'cow') return this.stop("HIT A COW - INSTANT JAIL");
-                        else if(e.t === 'buf') return this.stop("HIT A BUFFALO - TOTALED");
-                        else if(e.t === 'p') return this.stop("HIT PEDESTRIAN");
-                        else return this.stop("FATAL TRAFFIC CRASH");
+                    let nm = { l: e.x - rw/2 - 25, r: e.x + rw/2 + 25, t: sy - rh/2 - 25, b: sy + rh/2 + 25 };
+                    
+                    if(!(nm.l > pr.r || nm.r < pr.l || nm.t > pr.b || nm.b < pr.t)) {
+                        if(!(er.l > pr.r || er.r < pr.l || er.t > pr.b || er.b < pr.t)) {
+                            if(e.t === 'cow') return this.stop("HIT A COW - INSTANT JAIL");
+                            else if(e.t === 'buf') return this.stop("HIT A BUFFALO - TOTALED");
+                            else if(e.t === 'p') return this.stop("HIT PEDESTRIAN");
+                            else return this.stop("FATAL TRAFFIC CRASH");
+                        } else {
+                            if (p.speed > 5 && !e.nearMissed && (e.t === 'v' || e.t === 'p')) {
+                                e.nearMissed = true;
+                                this.stats.nearMisses++;
+                                this.addScore(20, "NEAR MISS");
+                            }
+                        }
                     }
                 }
 
@@ -652,6 +733,14 @@
                     else { mb.onclick = () => { document.getElementById('hud-screen').classList.remove('hidden'); gui.garage.classList.add('hidden'); g.startGame(currV, m.id); }; }
                     ml.appendChild(mb);
                 });
+                let nextCost = Infinity; let nextItem = '';
+                VEHICLES.forEach(v => { if(!UNLOCKED_VEHICLES.includes(v.id) && v.cost > GLOBAL_SCORE && v.cost < nextCost) { nextCost=v.cost; nextItem=v.name; } });
+                MAPS.forEach(m => { if(MAP_UNLOCKS < m.levelReq && m.unlockCost > GLOBAL_SCORE && m.unlockCost < nextCost) { nextCost=m.unlockCost; nextItem=m.name; } });
+                
+                const feed = document.getElementById('garage-progression-feedback');
+                if(nextCost !== Infinity) feed.innerHTML = `Next unlock: <b>${nextItem}</b> in <span style="color:#00ffff">${nextCost - GLOBAL_SCORE} PTS</span><br><br>Keep playing and drive safely to earn points!`;
+                else feed.innerHTML = `<span style="color:#00ff66">All regular items unlocked!</span>`;
+                
                 sel(currV);
             }
 
@@ -664,7 +753,11 @@
                 xc.drawImage(v.sp, 100 - (v.w*3), 75 - (v.h*3), v.w*6, v.h*6);
             }
 
-            document.getElementById('btn-restart').onclick = () => { gui.ov.classList.add('hidden'); gui.garage.classList.remove('hidden'); rUI(); };
+            document.getElementById('btn-restart-retry').onclick = () => { gui.ov.classList.add('hidden'); document.getElementById('hud-screen').classList.remove('hidden'); g.startGame(currV, g.mapId); };
+            document.getElementById('btn-restart-menu').onclick = () => { gui.ov.classList.add('hidden'); gui.garage.classList.remove('hidden'); rUI(); };
+            document.getElementById('btn-next-retry').onclick = () => { gui.ov.classList.add('hidden'); document.getElementById('level-complete-screen').classList.add('hidden'); document.getElementById('hud-screen').classList.remove('hidden'); g.startGame(currV, g.mapId); };
+            document.getElementById('btn-next-menu').onclick = () => { gui.ov.classList.add('hidden'); document.getElementById('level-complete-screen').classList.add('hidden'); gui.garage.classList.remove('hidden'); rUI(); };
+            
             rUI();
         });
     </script>
