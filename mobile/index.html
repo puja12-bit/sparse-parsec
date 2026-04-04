@@ -352,12 +352,13 @@
 
                 const updateTouchSteering = (e) => {
                     if (!this.isPlaying) return;
+                    this.keys.ArrowUp = e.touches.length > 0;
                     this.keys.ArrowLeft = false;
                     this.keys.ArrowRight = false;
                     let hasLeft = false, hasRight = false;
                     for (let i = 0; i < e.touches.length; i++) {
-                        if (e.touches[i].clientX < window.innerWidth / 2) hasLeft = true;
-                        else hasRight = true;
+                        if (e.touches[i].clientX < window.innerWidth * 0.4) hasLeft = true;
+                        else if (e.touches[i].clientX > window.innerWidth * 0.6) hasRight = true;
                     }
                     this.keys.ArrowLeft = hasLeft;
                     this.keys.ArrowRight = hasRight;
