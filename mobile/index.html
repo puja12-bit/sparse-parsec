@@ -354,7 +354,12 @@
                 this.lastTap = { l: 0, r: 0 };
 
                 const updateTouchSteering = (e) => {
-                    if (!this.isPlaying) return;
+                    if (!this.isPlaying) {
+                        this.keys.ArrowUp = false;
+                        this.keys.ArrowLeft = false;
+                        this.keys.ArrowRight = false;
+                        return;
+                    }
                     this.keys.ArrowUp = e.touches.length > 0;
                     this.keys.ArrowLeft = false;
                     this.keys.ArrowRight = false;
@@ -411,6 +416,7 @@
             startGame(vIdx, mapId) {
                 this.vConf = VEHICLES[vIdx]; this.mapId = mapId;
                 this.isPlaying = true; this.score = 0; this.fuel = 100;
+                this.keys = {}; this.ind = { l:false, r:false };
                 this.p = { x: 300, y: 650, speed: 0, angle: 0, logY: 0, w: this.vConf.w, h: this.vConf.h };
                 this.p.lane = this.resolveLane(this.p.x);
                 this.em = []; this.spawnTimer = 0;
