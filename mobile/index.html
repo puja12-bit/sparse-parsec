@@ -548,9 +548,50 @@
             }
 
             update(dt) {
+                let p = this.p;
+                let pw = p.w*0.8, ph = p.h*0.8; let pr = { l: p.x - pw/2, r: p.x + pw/2, t: p.y - ph/2, b: p.y + ph/2 };
+                let crashReason = null;
+                let nearMissLog = [];
+
+                for(let e of this.em) {
+                    let sy = 650 - (e.logY - p.logY);
+                    
+                    let rw = e.t==='v'? (e.w*2)*0.8 : (e.t==='p'? e.w*2 : e.w*2.5)*0.8; 
+                    let rh = e.t==='v'? (e.h*2)*0.8 : (e.t==='p'? e.h*2 : e.h*2.5)*0.8;
+
+                    let er = { l: e.x - rw/2, r: e.x + rw/2, t: sy - rh/2, b: sy + rh/2 };
+                    let nm = { l: e.x - rw/2 - 25, r: e.x + rw/2 + 25, t: sy - rh/2 - 25, b: sy + rh/2 + 25 };
+                    
+                    if(!(nm.l > pr.r || nm.r < pr.l || nm.t > pr.b || nm.b < pr.t)) {
+                        if(!(er.l > pr.r || er.r < pr.l || er.t > pr.b || er.b < pr.t)) {
+                            if(e.t === 'cow') crashReason = "HIT A COW - INSTANT JAIL";
+                            else if(e.t === 'buf') crashReason = "HIT A BUFFALO - TOTALED";
+                            else if(e.t === 'p') crashReason = "HIT PEDESTRIAN";
+                            else crashReason = "FATAL TRAFFIC CRASH";
+                            break;
+                        } else {
+                            if (p.speed > 5 && !e.nearMissed && (e.t === 'v' || e.t === 'p' || e.t === 'buf' || e.t === 'cow')) {
+                                nearMissLog.push(e);
+                            }
+                        }
+                    }
+                }
+
+                if (crashReason) {
+                    this.keys.ArrowUp = false;
+                    this.keys.ArrowLeft = false;
+                    this.keys.ArrowRight = false;
+                    return this.stop(crashReason);
+                } else {
+                    for (let e of nearMissLog) {
+                        e.nearMissed = true;
+                        if(this.stats.nearMiss !== undefined) this.stats.nearMiss++; else if(this.stats.nearMisses !== undefined) this.stats.nearMisses++;
+                        this.addScore(20, "NEAR MISS");
+                    }
+                }
+
                 this.fuel -= (dt/1000) * 1.5; if(this.fuel <= 0) return this.stop("OUT OF FUEL");
 
-                let p = this.p;
                 let brake = this.keys.ArrowDown; let accel = this.keys.ArrowUp;
                 
                 if(accel) p.speed += this.vConf.a;
@@ -671,44 +712,7 @@
                     if(e.logY < p.logY - 200 || e.x < -100 || e.x > 700) this.em.splice(i,1);
                 }
 
-                let pw = p.w*0.8, ph = p.h*0.8; let pr = { l: p.x - pw/2, r: p.x + pw/2, t: p.y - ph/2, b: p.y + ph/2 };
-                let crashReason = null;
-                let nearMissLog = [];
 
-                for(let e of this.em) {
-                    let sy = 650 - (e.logY - p.logY);
-                    
-                    // Box scaling math adjustments to account for V8 intrinsic draw bumps 
-                    let rw = e.t==='v'? (e.w*2)*0.8 : (e.t==='p'? e.w*2 : e.w*2.5)*0.8; 
-                    let rh = e.t==='v'? (e.h*2)*0.8 : (e.t==='p'? e.h*2 : e.h*2.5)*0.8;
-
-                    let er = { l: e.x - rw/2, r: e.x + rw/2, t: sy - rh/2, b: sy + rh/2 };
-                    let nm = { l: e.x - rw/2 - 25, r: e.x + rw/2 + 25, t: sy - rh/2 - 25, b: sy + rh/2 + 25 };
-                    
-                    if(!(nm.l > pr.r || nm.r < pr.l || nm.t > pr.b || nm.b < pr.t)) {
-                        if(!(er.l > pr.r || er.r < pr.l || er.t > pr.b || er.b < pr.t)) {
-                            if(e.t === 'cow') crashReason = "HIT A COW - INSTANT JAIL";
-                            else if(e.t === 'buf') crashReason = "HIT A BUFFALO - TOTALED";
-                            else if(e.t === 'p') crashReason = "HIT PEDESTRIAN";
-                            else crashReason = "FATAL TRAFFIC CRASH";
-                            break;
-                        } else {
-                            if (p.speed > 5 && !e.nearMissed && (e.t === 'v' || e.t === 'p' || e.t === 'buf' || e.t === 'cow')) {
-                                nearMissLog.push(e);
-                            }
-                        }
-                    }
-                }
-
-                if (crashReason) {
-                    return this.stop(crashReason);
-                } else {
-                    for (let e of nearMissLog) {
-                        e.nearMissed = true;
-                        if(this.stats.nearMiss !== undefined) this.stats.nearMiss++; else if(this.stats.nearMisses !== undefined) this.stats.nearMisses++;
-                        this.addScore(20, "NEAR MISS");
-                    }
-                }
 
                 document.getElementById('score').innerText = Math.floor(this.score); document.getElementById('speed').innerText = Math.floor(p.speed*10);
                 document.getElementById('dist').innerText = Math.floor(p.logY); document.getElementById('fuel-bar').style.width = this.fuel + '%';
@@ -782,9 +786,10 @@
             }
 
             loop(t) {
-                if(!this.isPlaying) return;
                 let dt = t - this.lastTime; this.lastTime = t; if(dt>100)dt=16;
-                this.update(dt); this.draw(); requestAnimationFrame(this.boundLoop);
+                if(this.isPlaying) this.update(dt);
+                this.draw();
+                requestAnimationFrame(this.boundLoop);
             }
         }
 
