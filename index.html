@@ -432,7 +432,6 @@
 
         const MAPS = [
             { id: 'hyderabad', name: 'HYDERABAD BLOCKS', unlockCost: 0, levelReq: 0 },
-            { id: 'highway', name: 'NATIONAL HIGHWAY', unlockCost: 5000, levelReq: 1 },
             { id: 'offroad', name: 'MP OFF-ROAD', unlockCost: 0, levelReq: 0 },
             { id: 'delhi', name: 'DELHI CHAOS', unlockCost: 0, levelReq: 0 },
             { id: 'mumbai', name: 'MUMBAI RUSH', unlockCost: 0, levelReq: 0 },
@@ -982,39 +981,73 @@
                 if (this.mapId === 'hills') {
                     let baseCurve = this.getCurveOffset(this.p.logY);
 
-                    // Sky
+                    // Sky Gradient
                     let gradSky = this.ctx.createLinearGradient(0,0,0,400);
-                    gradSky.addColorStop(0, '#87CEEB'); gradSky.addColorStop(1, '#B0E0E6');
+                    gradSky.addColorStop(0, '#A0D8EF'); // Light Blue Top
+                    gradSky.addColorStop(1, '#6CBDD5'); // Slightly darker bottom
                     this.ctx.fillStyle = gradSky; this.ctx.fillRect(0, 0, 600, 800);
 
-                    // Distant Mountains (move slowly)
-                    let mOffset = -(baseCurve * 0.2) % 200;
-                    this.ctx.fillStyle = '#8FA3B0';
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(0, 350 - fallDepthY);
-                    for(let i=-1; i<5; i++) {
-                        let mx = mOffset + (i*200);
-                        this.ctx.lineTo(mx + 100, 200 - (i%2*30) - fallDepthY);
-                        this.ctx.lineTo(mx + 200, 350 - fallDepthY);
-                    }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800);
-                    this.ctx.fill();
+                    // Sun
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    this.ctx.beginPath(); this.ctx.arc(450 - (baseCurve * 0.05), 120 - fallDepthY, 80, 0, Math.PI*2); this.ctx.fill();
 
-                    // Mid Hills (round, move faster)
-                    let hOffset = -(baseCurve * 0.6) % 300;
-                    this.ctx.fillStyle = '#5C7A70';
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(0, 450 - fallDepthY);
-                    for(let i=-1; i<4; i++) {
-                        let hx = hOffset + (i*300);
-                        this.ctx.quadraticCurveTo(hx + 150, 250 - fallDepthY, hx + 300, 450 - fallDepthY);
+                    // Far Mountains - Back Layer (Light Grey-Blue)
+                    let mOffset1 = -(baseCurve * 0.1) % 400;
+                    this.ctx.fillStyle = '#7C9AA6';
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 300 - fallDepthY);
+                    for(let i=-2; i<6; i++) {
+                        let mx = mOffset1 + (i*150);
+                        this.ctx.lineTo(mx + 75, 120 - (i%2*20) - fallDepthY);
+                        this.ctx.lineTo(mx + 150, 300 - fallDepthY);
                     }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800);
-                    this.ctx.fill();
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
+
+                    // Far Mountains - Front Layer (Darker Blue-Green)
+                    let mOffset2 = -(baseCurve * 0.2) % 300;
+                    this.ctx.fillStyle = '#4A7C75';
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 350 - fallDepthY);
+                    for(let i=-2; i<6; i++) {
+                        let mx = mOffset2 + (i*200);
+                        this.ctx.quadraticCurveTo(mx + 100, 150 - (i%2*30) - fallDepthY, mx + 200, 350 - fallDepthY);
+                    }
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
+
+                    // River / Valley
+                    let rOffset = -(baseCurve * 0.25) % 600;
+                    this.ctx.fillStyle = '#4AA3D8';
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 360 - fallDepthY);
+                    for(let i=-1; i<3; i++) {
+                        let rx = rOffset + (i*400);
+                        this.ctx.quadraticCurveTo(rx + 200, 380 - fallDepthY, rx + 400, 360 - fallDepthY);
+                    }
+                    this.ctx.lineTo(600, 390 - fallDepthY); this.ctx.lineTo(0, 390 - fallDepthY); this.ctx.fill();
+
+                    // Mid Hills (Large curved dark green shapes)
+                    let hOffset = -(baseCurve * 0.5) % 400;
+                    this.ctx.fillStyle = '#2E5E3E';
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 480 - fallDepthY);
+                    for(let i=-2; i<5; i++) {
+                        let hx = hOffset + (i*400);
+                        this.ctx.quadraticCurveTo(hx + 200, 250 - fallDepthY, hx + 400, 480 - fallDepthY);
+                    }
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
                     
+                    // Forest (Dense Clusters)
+                    let fOffset = -(baseCurve * 0.8) % 200;
+                    this.ctx.fillStyle = '#1A3B26';
+                    for(let i=-5; i<25; i++) {
+                        let tx = fOffset + (i*40) + (Math.sin(i*7)*20);
+                        let ty = 400 + (Math.cos(i*3)*50) - fallDepthY;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(tx, ty);
+                        this.ctx.lineTo(tx + 12, ty - 40 - (Math.sin(i)*20));
+                        this.ctx.lineTo(tx + 24, ty);
+                        this.ctx.fill();
+                    }
+
                     // Base ground covers
-                    this.ctx.fillStyle = '#41594F';
-                    this.ctx.fillRect(0, 400 - fallDepthY, 600, 800);
+                    this.ctx.fillStyle = '#234C31';
+                    this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
 
                     // Curved Road Polygon
                     this.ctx.fillStyle = '#111';
