@@ -402,6 +402,24 @@
             }
             return gen(w,h,data, {1:ct, 2:cb, 3:cw});
         }
+        function createBMWMSeriesSprite(w,h) {
+            let data = new Array(w*h).fill(0);
+            for(let y=0;y<h;y++) for(let x=0;x<w;x++) {
+                let edge = (x===0 || x===w-1 || y===0 || y===h-1);
+                let tire = ((y>3&&y<9)||(y>h-10&&y<h-4)) && (x<3||x>w-4);
+                let win = (y>10&&y<15&&x>2&&x<w-3) || (y>h-18&&y<h-12&&x>2&&x<w-3) || (y>15&&y<h-18&&(x===3||x===w-4));
+                if(tire) { data[y*w+x]=1; } else if(edge) { data[y*w+x]=2; } else if(win) { data[y*w+x]=3; } else {
+                    data[y*w+x]=4;
+                    if(y===1||y===2) { if((x>w/2-4 && x<w/2-1)||(x>w/2 && x<w/2+3)) data[y*w+x]=1; } // kidney grille
+                    if(y===2) { if(x===2||x===3||x===w-3||x===w-4) data[y*w+x]=5; } // headlights
+                    if(y===h-2) { if((x>1 && x<6)||(x>w-7 && x<w-2)) data[y*w+x]=6; } // taillights
+                    if(!win && !edge && !tire && y>2 && y<h-2) {
+                        if(x===w/2+1) data[y*w+x]=7; if(x===w/2+2) data[y*w+x]=8; if(x===w/2+3) data[y*w+x]=6; // M stripe
+                    }
+                }
+            }
+            return gen(w,h,data, {1:'#111', 2:'#777', 3:'#1a1a1a', 4:'#ffffff', 5:'#ccffff', 6:'#ff0000', 7:'#00aaff', 8:'#0000aa'});
+        }
 
         const SPRITES = {
             hum1: gen(8, 8, dHum1, PALS.human), hum2: gen(8, 8, dHum2, PALS.human),
@@ -414,7 +432,7 @@
             bmwBike: gen(10,16, dBike, {1:'#ffffff', 2:'#0033aa', 3:'#ff0022', 4:'#111'}),
             auto: gen(12,14, dAuto, PALS.auto),
             bwm: createBoxySprite(20, 36, '#ffffff', '#111', '#222'),
-            bwmWhite: createBoxySprite(24, 40, '#ffffff', '#e0e0e0', '#222'),
+            bmwMSeries: createBMWMSeriesSprite(24, 40),
             bus: createBoxySprite(30, 60, '#00ff66', '#222', '#111'),
             hole: gen(20, 20, dHole, {1:'#ff0033', 2:'#ffee00'}),
             breaker: gen(60, 10, dBreak, {1:'#ffee00', 2:'#000000', 3:'#0a0a0a', 4:'#ffffee'})
@@ -433,7 +451,7 @@
             { id: 'bullett', tier: 'BIKE', name: 'BULLETT ENFIELD', cost: 500, s: 14, a: 0.08, sp: SPRITES.bikeBlack, w:10, h:18, eSound: 'thump' },
             { id: 'ninja', tier: 'BIKE', name: 'NINJA ZX', cost: 3000, s: 18, a: 0.2, sp: SPRITES.bikeGreen, w:10, h:16, eSound: null },
             { id: 'bmw1000rr', tier: 'SUPERBIKE', name: 'BMW S1000RR', cost: 0, s: 26, a: 0.35, sp: SPRITES.bmwBike, w:10, h:16, eSound: null },
-            { id: 'bwm', tier: 'CAR', name: 'BWM M-SERIES', cost: 12000, s: 22, a: 0.25, sp: SPRITES.bwmWhite, w:24, h:40, eSound: 'smooth' }
+            { id: 'bmwm', tier: 'CAR', name: 'BMW M-SERIES', cost: 0, s: 22, a: 0.25, sp: SPRITES.bmwMSeries, w:24, h:40, eSound: 'smooth' }
         ];
 
         const MAPS = [
