@@ -411,6 +411,7 @@
             bikeBlue: gen(10,16, dBike, {1:'#0055ff', 2:'#00aaff', 3:'#fff', 4:'#111'}),
             bikeBlack: gen(10,16, dBike, {1:'#222', 2:'#444', 3:'#fff', 4:'#000'}),
             bikeGreen: gen(10,16, dBike, {1:'#00ff00', 2:'#55ff55', 3:'#fff', 4:'#111'}),
+            bmwBike: gen(10,16, dBike, {1:'#ffffff', 2:'#0033aa', 3:'#ff0022', 4:'#111'}),
             auto: gen(12,14, dAuto, PALS.auto),
             bwm: createBoxySprite(20, 36, '#ffffff', '#111', '#222'),
             bwmWhite: createBoxySprite(24, 40, '#ffffff', '#e0e0e0', '#222'),
@@ -428,19 +429,20 @@
         let HAS_UNLOCKED_THIS_SESSION = false;
 
         const VEHICLES = [
-            { id: 'hjonda', tier: 'BIKE', name: 'HONDA SPLENDER', cost: 0, s: 12, a: 0.1, sp: SPRITES.bikeBlue, w:10, h:16, eSound: 'generic' },
+            { id: 'hjonda', tier: 'BIKE', name: 'HONDA SPLENDER', cost: 0, s: 12, a: 0.1, sp: SPRITES.bikeBlue, w:10, h:16, eSound: null },
             { id: 'bullett', tier: 'BIKE', name: 'BULLETT ENFIELD', cost: 500, s: 14, a: 0.08, sp: SPRITES.bikeBlack, w:10, h:18, eSound: 'thump' },
-            { id: 'ninja', tier: 'BIKE', name: 'NINJA ZX', cost: 5000, s: 18, a: 0.2, sp: SPRITES.bikeGreen, w:10, h:16, eSound: 'fast' },
+            { id: 'ninja', tier: 'BIKE', name: 'NINJA ZX', cost: 3000, s: 18, a: 0.2, sp: SPRITES.bikeGreen, w:10, h:16, eSound: null },
+            { id: 'bmw1000rr', tier: 'SUPERBIKE', name: 'BMW S1000RR', cost: 8000, s: 26, a: 0.35, sp: SPRITES.bmwBike, w:10, h:16, eSound: null },
             { id: 'bwm', tier: 'CAR', name: 'BWM M-SERIES', cost: 12000, s: 22, a: 0.25, sp: SPRITES.bwmWhite, w:24, h:40, eSound: 'smooth' }
         ];
 
         const MAPS = [
             { id: 'hyderabad', name: 'HYDERABAD BLOCKS', unlockCost: 0, levelReq: 0 },
-            { id: 'highway', name: 'NATIONAL HIGHWAY', unlockCost: 5000, levelReq: 1 },
             { id: 'offroad', name: 'MP OFF-ROAD', unlockCost: 0, levelReq: 0 },
             { id: 'delhi', name: 'DELHI CHAOS', unlockCost: 0, levelReq: 0 },
             { id: 'mumbai', name: 'MUMBAI RUSH', unlockCost: 0, levelReq: 0 },
-            { id: 'tamilnadu', name: 'TAMIL NADU FLOW', unlockCost: 0, levelReq: 0 }
+            { id: 'tamilnadu', name: 'TAMIL NADU FLOW', unlockCost: 0, levelReq: 0 },
+            { id: 'hills', name: 'EK GALTI HILLS', unlockCost: 0, levelReq: 0 }
         ];
 
         function saveProgress() {
@@ -694,7 +696,10 @@
                     return; // Halt regular logic
                 }
                 if (p.speed > 0.5) {
-                    if (typeof AudioSys !== 'undefined') AudioSys.playEngine(this.vConf.eSound || 'generic');
+                    if (typeof AudioSys !== 'undefined') {
+                        if (this.vConf.eSound) AudioSys.playEngine(this.vConf.eSound);
+                        else AudioSys.stopEngine();
+                    }
                 } else {
                     if (typeof AudioSys !== 'undefined') AudioSys.stopEngine();
                 }
