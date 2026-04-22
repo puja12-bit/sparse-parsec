@@ -1006,72 +1006,82 @@
                 if (this.mapId === 'hills') {
                     let baseCurve = this.getCurveOffset(this.p.logY);
 
-                    // Sky Gradient
-                    let gradSky = this.ctx.createLinearGradient(0,0,0,400);
-                    gradSky.addColorStop(0, '#A0D8EF'); // Light Blue Top
-                    gradSky.addColorStop(1, '#6CBDD5'); // Slightly darker bottom
-                    this.ctx.fillStyle = gradSky; this.ctx.fillRect(0, 0, 600, 800);
+                    // --- NON-DIEGETIC UI / SYNTHWAVE WIREFRAME BACKGROUND ---
 
-                    // Sun
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                    this.ctx.beginPath(); this.ctx.arc(450 - (baseCurve * 0.05), 120 - fallDepthY, 80, 0, Math.PI*2); this.ctx.fill();
+                    // Base Dark Tech Sky
+                    this.ctx.fillStyle = '#050711'; this.ctx.fillRect(0, 0, 600, 800);
 
-                    // Far Mountains - Back Layer (Light Grey-Blue)
+                    // Grid Sky Lines
+                    this.ctx.strokeStyle = '#1e244d'; this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    for(let y=(this.p.logY%40); y<450; y+=40) { this.ctx.moveTo(0, y-fallDepthY); this.ctx.lineTo(600, y-fallDepthY); }
+                    this.ctx.stroke();
+
+                    // Synthetic Sun / Radar Core
+                    this.ctx.beginPath(); this.ctx.arc(450 - (baseCurve * 0.05), 120 - fallDepthY, 80, 0, Math.PI*2); 
+                    this.ctx.fillStyle = 'rgba(0, 243, 255, 0.05)'; this.ctx.fill();
+                    this.ctx.strokeStyle = '#00f3ff'; this.ctx.stroke();
+                    this.ctx.beginPath(); this.ctx.arc(450 - (baseCurve * 0.05), 120 - fallDepthY, 40, 0, Math.PI*2); this.ctx.stroke();
+
+                    // Wireframe Vector Mountains (Back Layer)
                     let mOffset1 = -(baseCurve * 0.1) % 400;
-                    this.ctx.fillStyle = '#7C9AA6';
+                    this.ctx.strokeStyle = '#df00ff'; // Neon Pink
+                    this.ctx.lineWidth = 2;
                     this.ctx.beginPath(); this.ctx.moveTo(0, 300 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset1 + (i*150);
                         this.ctx.lineTo(mx + 75, 120 - (i%2*20) - fallDepthY);
                         this.ctx.lineTo(mx + 150, 300 - fallDepthY);
                     }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
+                    this.ctx.stroke();
 
-                    // Far Mountains - Front Layer (Darker Blue-Green)
+                    // Wireframe Vector Mountains (Front Layer)
                     let mOffset2 = -(baseCurve * 0.2) % 300;
-                    this.ctx.fillStyle = '#4A7C75';
+                    this.ctx.strokeStyle = '#00f3ff'; // Neon Cyan
+                    this.ctx.setLineDash([5, 5]);
                     this.ctx.beginPath(); this.ctx.moveTo(0, 350 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset2 + (i*200);
-                        this.ctx.quadraticCurveTo(mx + 100, 150 - (i%2*30) - fallDepthY, mx + 200, 350 - fallDepthY);
+                        this.ctx.lineTo(mx + 100, 180 - (i%2*30) - fallDepthY);
+                        this.ctx.lineTo(mx + 200, 350 - fallDepthY);
                     }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
+                    this.ctx.stroke(); this.ctx.setLineDash([]);
 
-                    // River / Valley
+                    // Digital Data River
                     let rOffset = -(baseCurve * 0.25) % 600;
-                    this.ctx.fillStyle = '#4AA3D8';
-                    this.ctx.beginPath(); this.ctx.moveTo(0, 360 - fallDepthY);
+                    this.ctx.strokeStyle = '#00ff88'; this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
                     for(let i=-1; i<3; i++) {
                         let rx = rOffset + (i*400);
-                        this.ctx.quadraticCurveTo(rx + 200, 380 - fallDepthY, rx + 400, 360 - fallDepthY);
+                        this.ctx.moveTo(rx, 370 - fallDepthY); this.ctx.lineTo(rx + 400, 370 - fallDepthY);
+                        this.ctx.moveTo(rx, 374 - fallDepthY); this.ctx.lineTo(rx + 400, 374 - fallDepthY);
                     }
-                    this.ctx.lineTo(600, 390 - fallDepthY); this.ctx.lineTo(0, 390 - fallDepthY); this.ctx.fill();
+                    this.ctx.stroke();
 
-                    // Mid Hills (Large curved dark green shapes)
+                    // Geometric Wireframe Hills
                     let hOffset = -(baseCurve * 0.5) % 400;
-                    this.ctx.fillStyle = '#2E5E3E';
+                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; this.ctx.lineWidth = 2;
                     this.ctx.beginPath(); this.ctx.moveTo(0, 480 - fallDepthY);
                     for(let i=-2; i<5; i++) {
                         let hx = hOffset + (i*400);
                         this.ctx.quadraticCurveTo(hx + 200, 250 - fallDepthY, hx + 400, 480 - fallDepthY);
                     }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
+                    this.ctx.stroke();
                     
-                    // Forest (Dense Clusters)
+                    // Abstract Digital Trees (Data Nodes / + symbols)
                     let fOffset = -(baseCurve * 0.8) % 200;
-                    this.ctx.fillStyle = '#1A3B26';
+                    this.ctx.strokeStyle = '#ff0055';
                     for(let i=-5; i<25; i++) {
                         let tx = fOffset + (i*40) + (Math.sin(i*7)*20);
                         let ty = 400 + (Math.cos(i*3)*50) - fallDepthY;
                         this.ctx.beginPath();
-                        this.ctx.moveTo(tx, ty);
-                        this.ctx.lineTo(tx + 12, ty - 40 - (Math.sin(i)*20));
-                        this.ctx.lineTo(tx + 24, ty);
-                        this.ctx.fill();
+                        this.ctx.moveTo(tx - 6, ty); this.ctx.lineTo(tx + 6, ty);
+                        this.ctx.moveTo(tx, ty - 6); this.ctx.lineTo(tx, ty + 6);
+                        this.ctx.stroke();
                     }
 
-                    // Base ground covers
-                    this.ctx.fillStyle = '#234C31';
+                    // Base Grid Ground (Replaces Solid Green Base)
+                    this.ctx.fillStyle = '#010205';
                     this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
 
                     // Curved Road Polygon
@@ -1203,24 +1213,6 @@
                 this.ctx.shadowColor = '#00ffff'; this.ctx.shadowBlur = 15;
                 this.ctx.drawImage(this.vConf.sp, -this.vConf.w, -this.vConf.h, this.vConf.w*2, this.vConf.h*2);
                 this.ctx.restore();
-
-                if (this.mapId === 'hills') {
-                    let futureCurve = this.getCurveOffset(this.p.logY + 400) - this.getCurveOffset(this.p.logY);
-                    if (Math.abs(futureCurve) > 30) {
-                        if (Math.floor(performance.now() / 200) % 2 === 0) {
-                            this.ctx.fillStyle = '#ffcc00'; this.ctx.font = 'bold 80px monospace'; this.ctx.textAlign = 'center';
-                            this.ctx.fillText(futureCurve < 0 ? '<<<' : '>>>', 300, 150); this.ctx.textAlign = 'left';
-                        }
-                    }
-                    if (!this.isFalling && this.p.x > 300 + this.getCurveOffset(this.p.logY)) {
-                        if (Math.floor(performance.now() / 150) % 2 === 0) {
-                            this.ctx.fillStyle = '#ff0033'; this.ctx.font = 'bold 60px sans-serif'; this.ctx.textAlign = 'center';
-                            this.ctx.fillText("WRONG WAY", 300, 300);
-                            this.ctx.strokeStyle = '#ffffff'; this.ctx.lineWidth = 2; this.ctx.strokeText("WRONG WAY", 300, 300);
-                            this.ctx.textAlign = 'left';
-                        }
-                    }
-                }
                 
                 if (this.isFalling) {
                     this.ctx.fillStyle = `rgba(0,0,0,${this.fallTimer/1000})`;
