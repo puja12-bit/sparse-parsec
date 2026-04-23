@@ -1006,24 +1006,12 @@
                 if (this.mapId === 'hills') {
                     let baseCurve = this.getCurveOffset(this.p.logY);
 
-                    // Base Layer: Deep Water (Revealed beautifully at the bottom when falling)
-                    this.ctx.fillStyle = '#0CA4FF'; this.ctx.fillRect(0, 0, 600, 800);
-                    this.ctx.strokeStyle = '#5AD3FF'; this.ctx.lineWidth = 2;
-                    let waveAnim = (performance.now() * 0.02) % 60;
-                    for(let y=480; y<850; y+=30) {
-                        this.ctx.beginPath();
-                        for(let x=-60; x<=660; x+=60) {
-                            this.ctx.quadraticCurveTo(x+30+waveAnim, y+10, x+60+waveAnim, y);
-                        }
-                        this.ctx.stroke();
-                    }
-
-                    // Vibrant Sky
-                    let skyGrad = this.ctx.createLinearGradient(0,0,0,300);
-                    skyGrad.addColorStop(0, '#1EA7E1'); // Bright Azure
-                    skyGrad.addColorStop(1, '#81D8D0'); // Tiffany Blue
+                    // --- 1. CONTINUOUS FULL-SCREEN SKY ---
+                    let skyGrad = this.ctx.createLinearGradient(0,0,0,800);
+                    skyGrad.addColorStop(0, '#1EA7E1'); 
+                    skyGrad.addColorStop(1, '#81D8D0'); 
                     this.ctx.fillStyle = skyGrad; 
-                    this.ctx.fillRect(0, 0, 600, 480 - fallDepthY);
+                    this.ctx.fillRect(0, 0, 600, 800); // Fully covers back
 
                     // Puffy Cartoon Clouds
                     let cloudOffset = -(baseCurve * 0.05) % 600;
@@ -1038,71 +1026,69 @@
                         this.ctx.fill();
                     }
 
-                    // Bright Distant Mountains (Natural Grey-Blue)
+                    // --- 2. FAR MOUNTAINS ---
                     let mOffset1 = -(baseCurve * 0.1) % 400;
                     this.ctx.fillStyle = '#7C9AA6';
                     this.ctx.beginPath(); this.ctx.moveTo(0, 300 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset1 + (i*150);
-                        this.ctx.lineTo(mx + 75, 150 - (i%2*20) - fallDepthY);
+                        this.ctx.lineTo(mx + 75, 120 - (i%2*20) - fallDepthY);
                         this.ctx.lineTo(mx + 150, 300 - fallDepthY);
                     }
                     this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
 
-                    // Mid Mountains (Natural Blue-Green)
-                    let mOffset2 = -(baseCurve * 0.2) % 300;
-                    this.ctx.fillStyle = '#4A7C75'; 
-                    this.ctx.strokeStyle = '#38635C'; this.ctx.lineWidth = 4;
-                    this.ctx.beginPath(); this.ctx.moveTo(0, 350 - fallDepthY);
-                    for(let i=-2; i<6; i++) {
-                        let mx = mOffset2 + (i*200);
-                        this.ctx.quadraticCurveTo(mx + 100, 180 - (i%2*30) - fallDepthY, mx + 200, 350 - fallDepthY);
-                    }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
-                    this.ctx.fill(); this.ctx.stroke();
+                    // --- 3. MID LAYER HILLS, RIVER, TREES (Continuous Cascade) ---
+                    let hillColors = ['#4A7C75', '#5ca03e', '#66bb4a', '#76FF03', '#64DD17', '#4CAF50', '#388E3C', '#2E7D32'];
+                    for (let layer = 0; layer < 8; layer++) {
+                        let hOffset = -(baseCurve * (0.15 + layer*0.1)) % 400; 
+                        let waveY = Math.sin((this.p.logY * 0.01) + layer) * 20; // Simulated undulating terrain instead of popping vertical wrap
+                        let baseHeight = 350 + layer * 70; // Stagger layered curves down to the absolute bottom
+                        
+                        this.ctx.fillStyle = hillColors[layer];
+                        this.ctx.strokeStyle = '#1b4a1b'; 
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath(); 
+                        
+                        this.ctx.moveTo(0, baseHeight + waveY - fallDepthY);
+                        for(let i=-2; i<5; i++) {
+                            let hx = hOffset + (i*400) + (layer*50);
+                            this.ctx.quadraticCurveTo(hx + 200, baseHeight - 120 + waveY - fallDepthY, hx + 400, baseHeight + waveY - fallDepthY);
+                        }
+                        this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
+                        this.ctx.fill(); this.ctx.stroke();
 
-                    // Bright Cyan River
-                    let rOffset = -(baseCurve * 0.25) % 600;
-                    this.ctx.fillStyle = '#00E5FF';
-                    this.ctx.beginPath(); this.ctx.moveTo(0, 360 - fallDepthY);
-                    for(let i=-1; i<3; i++) {
-                        let rx = rOffset + (i*400);
-                        this.ctx.quadraticCurveTo(rx + 200, 385 - fallDepthY, rx + 400, 360 - fallDepthY);
-                    }
-                    this.ctx.lineTo(600, 395 - fallDepthY); this.ctx.lineTo(0, 395 - fallDepthY); this.ctx.fill();
-
-                    // Mid Hills (Vibrant Lime Green with curved stroke)
-                    let hOffset = -(baseCurve * 0.5) % 400;
-                    this.ctx.fillStyle = '#76FF03'; 
-                    this.ctx.strokeStyle = '#64DD17'; this.ctx.lineWidth = 10;
-                    this.ctx.beginPath(); this.ctx.moveTo(0, 480 - fallDepthY);
-                    for(let i=-2; i<5; i++) {
-                        let hx = hOffset + (i*400);
-                        this.ctx.quadraticCurveTo(hx + 200, 250 - fallDepthY, hx + 400, 480 - fallDepthY);
-                    }
-                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
-                    this.ctx.fill(); this.ctx.stroke();
-                    
-                    // Cartoon Lollipop Trees are now drawn dynamically in the env loop to fly past!
-
-                    // Base Ground (Solid Vibrant Grass, shrinking rapidly when falling to reveal water)
-                    this.ctx.fillStyle = '#4CAF50';
-                    this.ctx.fillRect(0, 450 - fallDepthY, 600, 350);
-                    
-                    // Moving textured grass lines (Parallax)
-                    this.ctx.strokeStyle = '#388E3C'; 
-                    this.ctx.lineWidth = 6;
-                    let speedScroll = (this.p.logY * 1.5) % 150; 
-                    for(let y = 450 - fallDepthY; y < 850; y += 150) {
-                        let drawY = y + speedScroll;
-                        if(drawY > 450 - fallDepthY) {
-                            this.ctx.beginPath();
-                            for(let x=-100; x<700; x+=200) {
-                                // Add subtle curve linking with road motion
-                                let localOff = this.getCurveOffset(this.p.logY + (650 - (drawY + fallDepthY))) * 0.4;
-                                this.ctx.quadraticCurveTo(x + 100 + localOff, drawY - 25, x + 200 + localOff, drawY);
+                        // --- RIVER INTERWOVEN ---
+                        if (layer === 2) {
+                            let rOffset = -(baseCurve * 0.25) % 600;
+                            this.ctx.fillStyle = '#0CA4FF'; // Ocean water
+                            this.ctx.strokeStyle = '#5AD3FF'; this.ctx.lineWidth = 4;
+                            this.ctx.beginPath(); this.ctx.moveTo(0, baseHeight + waveY - fallDepthY);
+                            for(let i=-1; i<4; i++) {
+                                let rx = rOffset + (i*400);
+                                this.ctx.quadraticCurveTo(rx + 200, baseHeight - 80 + waveY - fallDepthY, rx + 400, baseHeight + waveY - fallDepthY);
                             }
-                            this.ctx.stroke();
+                            this.ctx.lineTo(600, baseHeight + waveY + 40 - fallDepthY);
+                            for(let i=3; i>=-1; i--) {
+                                let rx = rOffset + (i*400);
+                                this.ctx.quadraticCurveTo(rx + 200, baseHeight - 40 + waveY - fallDepthY, rx, baseHeight + waveY + 40 - fallDepthY);
+                            }
+                            this.ctx.fill(); this.ctx.stroke();
+                        }
+
+                        // --- SCATTERED TREES INTERWOVEN ---
+                        let tOffset = -(baseCurve * (0.18 + layer*0.1)) % 250;
+                        let numTrees = 8 + (layer * 2); // get denser near bottom
+                        for(let i=-2; i<numTrees; i++) {
+                             let tx = tOffset + (i * (600/numTrees)) + (Math.sin(layer*i)*30);
+                             let ty = baseHeight + waveY - 20 - (Math.sin(i)*30) - fallDepthY;
+                             if (ty > 800 || ty < 300) continue;
+                             
+                             this.ctx.fillStyle = '#795548'; // Trunk
+                             this.ctx.fillRect(tx - 3, ty, 6, 20);
+                             this.ctx.fillStyle = '#00E676'; // Leaves Base
+                             this.ctx.beginPath(); this.ctx.arc(tx, ty - 10, 15, 0, Math.PI*2); this.ctx.fill();
+                             this.ctx.fillStyle = '#B2FF59'; // Leave Highlight
+                             this.ctx.beginPath(); this.ctx.arc(tx - 4, ty - 14, 6, 0, Math.PI*2); this.ctx.fill();
                         }
                     }
 
@@ -1196,12 +1182,6 @@
                         this.ctx.fillStyle = '#ffaa00'; this.ctx.fillRect(e.x - 20, sy - 20, 40, 40);
                         this.ctx.fillStyle = '#000'; this.ctx.font = 'bold 20px monospace';
                         this.ctx.fillText(e.tType==='chevLeft' ? '<<<' : '>>>', e.x - 18, sy + 6);
-                    } else if (this.mapId === 'hills' && e.tType === 'tree') {
-                        this.ctx.shadowBlur = 0;
-                        let tx = e.x; let ty = sy;
-                        this.ctx.fillStyle = '#795548'; this.ctx.fillRect(tx - 6, ty - 10, 12, 40);
-                        this.ctx.fillStyle = '#00E676'; this.ctx.beginPath(); this.ctx.arc(tx, ty - 30, 30, 0, Math.PI*2); this.ctx.fill();
-                        this.ctx.fillStyle = '#B2FF59'; this.ctx.beginPath(); this.ctx.arc(tx - 10, ty - 40, 12, 0, Math.PI*2); this.ctx.fill();
                     } else {
                         this.ctx.drawImage(e.sp, e.x - e.w/2, sy - e.h/2, e.w, e.h);
                     }
