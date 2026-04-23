@@ -1083,24 +1083,11 @@
                     this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
                     this.ctx.fill(); this.ctx.stroke();
                     
-                    // Cartoon Lollipop Trees
-                    let fOffset = -(baseCurve * 0.8) % 200;
-                    for(let i=-5; i<25; i++) {
-                        let tx = fOffset + (i*40) + (Math.sin(i*7)*20);
-                        let ty = 400 + (Math.cos(i*3)*50) - fallDepthY;
-                        
-                        this.ctx.fillStyle = '#795548'; // Trunk
-                        this.ctx.fillRect(tx - 3, ty, 6, 20);
-                        
-                        this.ctx.fillStyle = '#00E676'; // Leaves Base
-                        this.ctx.beginPath(); this.ctx.arc(tx, ty - 10, 15, 0, Math.PI*2); this.ctx.fill();
-                        this.ctx.fillStyle = '#B2FF59'; // Leave Highlight
-                        this.ctx.beginPath(); this.ctx.arc(tx - 4, ty - 14, 6, 0, Math.PI*2); this.ctx.fill();
-                    }
+                    // Cartoon Lollipop Trees are now drawn dynamically in the env loop to fly past!
 
-                    // Base Ground (Solid Vibrant Grass)
+                    // Base Ground (Solid Vibrant Grass, shrinking rapidly when falling to reveal water)
                     this.ctx.fillStyle = '#4CAF50';
-                    this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
+                    this.ctx.fillRect(0, 450 - fallDepthY, 600, 350);
                     
                     // Moving textured grass lines (Parallax)
                     this.ctx.strokeStyle = '#388E3C'; 
@@ -1209,6 +1196,12 @@
                         this.ctx.fillStyle = '#ffaa00'; this.ctx.fillRect(e.x - 20, sy - 20, 40, 40);
                         this.ctx.fillStyle = '#000'; this.ctx.font = 'bold 20px monospace';
                         this.ctx.fillText(e.tType==='chevLeft' ? '<<<' : '>>>', e.x - 18, sy + 6);
+                    } else if (this.mapId === 'hills' && e.tType === 'tree') {
+                        this.ctx.shadowBlur = 0;
+                        let tx = e.x; let ty = sy;
+                        this.ctx.fillStyle = '#795548'; this.ctx.fillRect(tx - 6, ty - 10, 12, 40);
+                        this.ctx.fillStyle = '#00E676'; this.ctx.beginPath(); this.ctx.arc(tx, ty - 30, 30, 0, Math.PI*2); this.ctx.fill();
+                        this.ctx.fillStyle = '#B2FF59'; this.ctx.beginPath(); this.ctx.arc(tx - 10, ty - 40, 12, 0, Math.PI*2); this.ctx.fill();
                     } else {
                         this.ctx.drawImage(e.sp, e.x - e.w/2, sy - e.h/2, e.w, e.h);
                     }
