@@ -779,13 +779,13 @@
                         
                         let baseEnvX = isLeft ? Math.random()*80 : 520 + Math.random()*80;
 
-                        if (this.mapId === 'hills' && Math.random() < 0.25) {
-                            tType = isLeft ? 'chevRight' : 'chevLeft'; 
-                            baseEnvX = isLeft ? 170 : 430;
-                        } else if (r < 0.3) { sp = SPRITES.shop; w=60; h=30; } else if (r < 0.6) { sp = SPRITES.house; w=60; h=40; }
+                        if (this.mapId === 'hills') {
+                            // Only spawn trees in hills, ignore houses/shops and chevrons
+                        } else if (r < 0.3) { sp = SPRITES.shop; w=60; h=30; } 
+                        else if (r < 0.6) { sp = SPRITES.house; w=60; h=40; }
                         
                         // Recalibrate tight borders for hills to keep normal objects near curve
-                        if (this.mapId === 'hills' && tType !== 'chevRight' && tType !== 'chevLeft') {
+                        if (this.mapId === 'hills') {
                             baseEnvX = isLeft ? 120 + Math.random()*40 : 440 + Math.random()*40;
                         }
 
@@ -1027,9 +1027,9 @@
                         this.ctx.fill();
                     }
 
-                    // Bright Distant Mountains (Purple/Pinkish hues)
+                    // Bright Distant Mountains (Natural Grey-Blue)
                     let mOffset1 = -(baseCurve * 0.1) % 400;
-                    this.ctx.fillStyle = '#9C27B0';
+                    this.ctx.fillStyle = '#7C9AA6';
                     this.ctx.beginPath(); this.ctx.moveTo(0, 300 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset1 + (i*150);
@@ -1038,10 +1038,10 @@
                     }
                     this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
 
-                    // Mid Mountains (Vibrant Orange/Yellow)
+                    // Mid Mountains (Natural Blue-Green)
                     let mOffset2 = -(baseCurve * 0.2) % 300;
-                    this.ctx.fillStyle = '#FF9800'; 
-                    this.ctx.strokeStyle = '#E65100'; this.ctx.lineWidth = 4;
+                    this.ctx.fillStyle = '#4A7C75'; 
+                    this.ctx.strokeStyle = '#38635C'; this.ctx.lineWidth = 4;
                     this.ctx.beginPath(); this.ctx.moveTo(0, 350 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset2 + (i*200);
@@ -1087,17 +1087,9 @@
                         this.ctx.beginPath(); this.ctx.arc(tx - 4, ty - 14, 6, 0, Math.PI*2); this.ctx.fill();
                     }
 
-                    // Base Ground (Checkerboard Grass Style)
+                    // Base Ground (Solid Vibrant Grass)
                     this.ctx.fillStyle = '#4CAF50';
                     this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
-                    this.ctx.fillStyle = '#66BB6A';
-                    for(let y=450 - fallDepthY; y<800; y+=40) {
-                        for(let x=0; x<600; x+=40) {
-                            if((Math.floor(x/40) + Math.floor((this.p.logY+y)/40)) % 2 === 0) {
-                                this.ctx.fillRect(x, Math.floor(y), 40, 40);
-                            }
-                        }
-                    }
 
                     // Curved Road Polygon
                     this.ctx.fillStyle = '#111';
