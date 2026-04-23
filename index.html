@@ -1006,83 +1006,98 @@
                 if (this.mapId === 'hills') {
                     let baseCurve = this.getCurveOffset(this.p.logY);
 
-                    // --- NON-DIEGETIC UI / SYNTHWAVE WIREFRAME BACKGROUND ---
+                    // --- COLORFUL MARIO KART STYLE BACKGROUND (Hills Only) ---
 
-                    // Base Dark Tech Sky
-                    this.ctx.fillStyle = '#050711'; this.ctx.fillRect(0, 0, 600, 800);
+                    // Vibrant Sky
+                    let skyGrad = this.ctx.createLinearGradient(0,0,0,300);
+                    skyGrad.addColorStop(0, '#1EA7E1'); // Bright Azure
+                    skyGrad.addColorStop(1, '#81D8D0'); // Tiffany Blue
+                    this.ctx.fillStyle = skyGrad; this.ctx.fillRect(0, 0, 600, 800);
 
-                    // Grid Sky Lines
-                    this.ctx.strokeStyle = '#1e244d'; this.ctx.lineWidth = 1;
-                    this.ctx.beginPath();
-                    for(let y=(this.p.logY%40); y<450; y+=40) { this.ctx.moveTo(0, y-fallDepthY); this.ctx.lineTo(600, y-fallDepthY); }
-                    this.ctx.stroke();
+                    // Puffy Cartoon Clouds
+                    let cloudOffset = -(baseCurve * 0.05) % 600;
+                    this.ctx.fillStyle = '#FFFFFF';
+                    for(let i=0; i<3; i++) {
+                        let cx = cloudOffset + i*250 + (i%2===0?100:0);
+                        let cy = 80 - fallDepthY + (i*30);
+                        this.ctx.beginPath();
+                        this.ctx.arc(cx, cy, 30, 0, Math.PI*2);
+                        this.ctx.arc(cx + 30, cy - 20, 40, 0, Math.PI*2);
+                        this.ctx.arc(cx + 60, cy, 35, 0, Math.PI*2);
+                        this.ctx.fill();
+                    }
 
-                    // Synthetic Sun / Radar Core
-                    this.ctx.beginPath(); this.ctx.arc(450 - (baseCurve * 0.05), 120 - fallDepthY, 80, 0, Math.PI*2); 
-                    this.ctx.fillStyle = 'rgba(0, 243, 255, 0.05)'; this.ctx.fill();
-                    this.ctx.strokeStyle = '#00f3ff'; this.ctx.stroke();
-                    this.ctx.beginPath(); this.ctx.arc(450 - (baseCurve * 0.05), 120 - fallDepthY, 40, 0, Math.PI*2); this.ctx.stroke();
-
-                    // Wireframe Vector Mountains (Back Layer)
+                    // Bright Distant Mountains (Purple/Pinkish hues)
                     let mOffset1 = -(baseCurve * 0.1) % 400;
-                    this.ctx.strokeStyle = '#df00ff'; // Neon Pink
-                    this.ctx.lineWidth = 2;
+                    this.ctx.fillStyle = '#9C27B0';
                     this.ctx.beginPath(); this.ctx.moveTo(0, 300 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset1 + (i*150);
-                        this.ctx.lineTo(mx + 75, 120 - (i%2*20) - fallDepthY);
+                        this.ctx.lineTo(mx + 75, 150 - (i%2*20) - fallDepthY);
                         this.ctx.lineTo(mx + 150, 300 - fallDepthY);
                     }
-                    this.ctx.stroke();
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
 
-                    // Wireframe Vector Mountains (Front Layer)
+                    // Mid Mountains (Vibrant Orange/Yellow)
                     let mOffset2 = -(baseCurve * 0.2) % 300;
-                    this.ctx.strokeStyle = '#00f3ff'; // Neon Cyan
-                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.fillStyle = '#FF9800'; 
+                    this.ctx.strokeStyle = '#E65100'; this.ctx.lineWidth = 4;
                     this.ctx.beginPath(); this.ctx.moveTo(0, 350 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset2 + (i*200);
-                        this.ctx.lineTo(mx + 100, 180 - (i%2*30) - fallDepthY);
-                        this.ctx.lineTo(mx + 200, 350 - fallDepthY);
+                        this.ctx.quadraticCurveTo(mx + 100, 180 - (i%2*30) - fallDepthY, mx + 200, 350 - fallDepthY);
                     }
-                    this.ctx.stroke(); this.ctx.setLineDash([]);
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
+                    this.ctx.fill(); this.ctx.stroke();
 
-                    // Digital Data River
+                    // Bright Cyan River
                     let rOffset = -(baseCurve * 0.25) % 600;
-                    this.ctx.strokeStyle = '#00ff88'; this.ctx.lineWidth = 1;
-                    this.ctx.beginPath();
+                    this.ctx.fillStyle = '#00E5FF';
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 360 - fallDepthY);
                     for(let i=-1; i<3; i++) {
                         let rx = rOffset + (i*400);
-                        this.ctx.moveTo(rx, 370 - fallDepthY); this.ctx.lineTo(rx + 400, 370 - fallDepthY);
-                        this.ctx.moveTo(rx, 374 - fallDepthY); this.ctx.lineTo(rx + 400, 374 - fallDepthY);
+                        this.ctx.quadraticCurveTo(rx + 200, 385 - fallDepthY, rx + 400, 360 - fallDepthY);
                     }
-                    this.ctx.stroke();
+                    this.ctx.lineTo(600, 395 - fallDepthY); this.ctx.lineTo(0, 395 - fallDepthY); this.ctx.fill();
 
-                    // Geometric Wireframe Hills
+                    // Mid Hills (Vibrant Lime Green with curved stroke)
                     let hOffset = -(baseCurve * 0.5) % 400;
-                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; this.ctx.lineWidth = 2;
+                    this.ctx.fillStyle = '#76FF03'; 
+                    this.ctx.strokeStyle = '#64DD17'; this.ctx.lineWidth = 10;
                     this.ctx.beginPath(); this.ctx.moveTo(0, 480 - fallDepthY);
                     for(let i=-2; i<5; i++) {
                         let hx = hOffset + (i*400);
                         this.ctx.quadraticCurveTo(hx + 200, 250 - fallDepthY, hx + 400, 480 - fallDepthY);
                     }
-                    this.ctx.stroke();
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
+                    this.ctx.fill(); this.ctx.stroke();
                     
-                    // Abstract Digital Trees (Data Nodes / + symbols)
+                    // Cartoon Lollipop Trees
                     let fOffset = -(baseCurve * 0.8) % 200;
-                    this.ctx.strokeStyle = '#ff0055';
                     for(let i=-5; i<25; i++) {
                         let tx = fOffset + (i*40) + (Math.sin(i*7)*20);
                         let ty = 400 + (Math.cos(i*3)*50) - fallDepthY;
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(tx - 6, ty); this.ctx.lineTo(tx + 6, ty);
-                        this.ctx.moveTo(tx, ty - 6); this.ctx.lineTo(tx, ty + 6);
-                        this.ctx.stroke();
+                        
+                        this.ctx.fillStyle = '#795548'; // Trunk
+                        this.ctx.fillRect(tx - 3, ty, 6, 20);
+                        
+                        this.ctx.fillStyle = '#00E676'; // Leaves Base
+                        this.ctx.beginPath(); this.ctx.arc(tx, ty - 10, 15, 0, Math.PI*2); this.ctx.fill();
+                        this.ctx.fillStyle = '#B2FF59'; // Leave Highlight
+                        this.ctx.beginPath(); this.ctx.arc(tx - 4, ty - 14, 6, 0, Math.PI*2); this.ctx.fill();
                     }
 
-                    // Base Grid Ground (Replaces Solid Green Base)
-                    this.ctx.fillStyle = '#010205';
+                    // Base Ground (Checkerboard Grass Style)
+                    this.ctx.fillStyle = '#4CAF50';
                     this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
+                    this.ctx.fillStyle = '#66BB6A';
+                    for(let y=450 - fallDepthY; y<800; y+=40) {
+                        for(let x=0; x<600; x+=40) {
+                            if((Math.floor(x/40) + Math.floor((this.p.logY+y)/40)) % 2 === 0) {
+                                this.ctx.fillRect(x, Math.floor(y), 40, 40);
+                            }
+                        }
+                    }
 
                     // Curved Road Polygon
                     this.ctx.fillStyle = '#111';
