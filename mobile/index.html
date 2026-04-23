@@ -1066,13 +1066,24 @@
                 if (this.mapId === 'hills') {
                     let baseCurve = this.getCurveOffset(this.p.logY);
 
-                    // --- COLORFUL MARIO KART STYLE BACKGROUND (Hills Only) ---
+                    // Base Layer: Deep Water (Revealed beautifully at the bottom when falling)
+                    this.ctx.fillStyle = '#0CA4FF'; this.ctx.fillRect(0, 0, 600, 800);
+                    this.ctx.strokeStyle = '#5AD3FF'; this.ctx.lineWidth = 2;
+                    let waveAnim = (performance.now() * 0.02) % 60;
+                    for(let y=480; y<850; y+=30) {
+                        this.ctx.beginPath();
+                        for(let x=-60; x<=660; x+=60) {
+                            this.ctx.quadraticCurveTo(x+30+waveAnim, y+10, x+60+waveAnim, y);
+                        }
+                        this.ctx.stroke();
+                    }
 
                     // Vibrant Sky
                     let skyGrad = this.ctx.createLinearGradient(0,0,0,300);
                     skyGrad.addColorStop(0, '#1EA7E1'); // Bright Azure
                     skyGrad.addColorStop(1, '#81D8D0'); // Tiffany Blue
-                    this.ctx.fillStyle = skyGrad; this.ctx.fillRect(0, 0, 600, 800);
+                    this.ctx.fillStyle = skyGrad; 
+                    this.ctx.fillRect(0, 0, 600, 480 - fallDepthY);
 
                     // Puffy Cartoon Clouds
                     let cloudOffset = -(baseCurve * 0.05) % 600;
@@ -1150,6 +1161,23 @@
                     // Base Ground (Solid Vibrant Grass)
                     this.ctx.fillStyle = '#4CAF50';
                     this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
+                    
+                    // Moving textured grass lines (Parallax)
+                    this.ctx.strokeStyle = '#388E3C'; 
+                    this.ctx.lineWidth = 6;
+                    let speedScroll = (this.p.logY * 1.5) % 150; 
+                    for(let y = 450 - fallDepthY; y < 850; y += 150) {
+                        let drawY = y + speedScroll;
+                        if(drawY > 450 - fallDepthY) {
+                            this.ctx.beginPath();
+                            for(let x=-100; x<700; x+=200) {
+                                // Add subtle curve linking with road motion
+                                let localOff = this.getCurveOffset(this.p.logY + (650 - (drawY + fallDepthY))) * 0.4;
+                                this.ctx.quadraticCurveTo(x + 100 + localOff, drawY - 25, x + 200 + localOff, drawY);
+                            }
+                            this.ctx.stroke();
+                        }
+                    }
 
                     // Curved Road Polygon
                     this.ctx.fillStyle = '#111';
