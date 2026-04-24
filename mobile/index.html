@@ -457,9 +457,12 @@
 
         let GLOBAL_SCORE = localStorage.getItem('v8_score') ? parseInt(localStorage.getItem('v8_score')) : 0;
         let MAP_UNLOCKS = localStorage.getItem('v8_maps') ? parseInt(localStorage.getItem('v8_maps')) : 0;
-        let UNLOCKED_VEHICLES = localStorage.getItem('v8_vehicles') ? JSON.parse(localStorage.getItem('v8_vehicles')) : ['hjonda'];
+        let UNLOCKED_VEHICLES = localStorage.getItem('v8_vehicles') ? JSON.parse(localStorage.getItem('v8_vehicles')) : ['hjonda', 'bullett'];
         if(UNLOCKED_VEHICLES.includes('hindo') && !UNLOCKED_VEHICLES.includes('ninja')) {
             UNLOCKED_VEHICLES.push('ninja'); localStorage.setItem('v8_vehicles', JSON.stringify(UNLOCKED_VEHICLES));
+        }
+        if(!UNLOCKED_VEHICLES.includes('bullett')) {
+            UNLOCKED_VEHICLES.push('bullett'); localStorage.setItem('v8_vehicles', JSON.stringify(UNLOCKED_VEHICLES));
         }
         let HAS_UNLOCKED_THIS_SESSION = false;
 
