@@ -215,6 +215,9 @@
             return c;
         }
 
+        let GLOBAL_THUMP_ARR = null;
+        fetch('assets/bullet_engine.m4a').then(r=>r.arrayBuffer()).then(b=>{GLOBAL_THUMP_ARR=b;}).catch(e=>{});
+
         const AudioSys = {
             ctx: null,
             ambNode: null,
@@ -222,9 +225,10 @@
             init() {
                 if (!this.ctx) { 
                     try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} 
-                    if (this.ctx) {
-                        fetch('assets/bullet_engine.m4a').then(r=>r.arrayBuffer()).then(b=>this.ctx.decodeAudioData(b)).then(a=>{this.customThumpBuf=a;}).catch(e=>{});
-                    }
+                }
+                if (this.ctx && GLOBAL_THUMP_ARR && !this.customThumpBuf) {
+                    let bufToDecode = GLOBAL_THUMP_ARR; GLOBAL_THUMP_ARR = null;
+                    this.ctx.decodeAudioData(bufToDecode, a => { this.customThumpBuf = a; if(this.engineType === 'thump') this.playEngine('thump', true); }, e => {});
                 }
                 if (this.ctx && this.ctx.state === 'suspended') { try { this.ctx.resume(); } catch(e){} }
             },
@@ -273,10 +277,10 @@
             engineGain: null,
             engineLFO: null,
             engineType: null,
-            playEngine(type) {
+            playEngine(type, force=false) {
                 this.init();
                 if (!this.ctx || this.ctx.state !== 'running') return;
-                if (this.engineType === type && this.engineNode) return; 
+                if (!force && this.engineType === type && this.engineNode) return; 
                 this.stopEngine();
                 this.engineType = type;
                 let t = this.ctx.currentTime;
