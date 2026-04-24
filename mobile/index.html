@@ -222,8 +222,14 @@
         const AudioSys = {
             ctx: null,
             ambNode: null,
+            customThumpBuf: null,
             init() {
-                if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+                if (!this.ctx) { 
+                    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} 
+                    if (this.ctx) {
+                        fetch('../assets/bullet_engine.m4a').then(r=>r.arrayBuffer()).then(b=>this.ctx.decodeAudioData(b)).then(a=>{this.customThumpBuf=a;}).catch(e=>{});
+                    }
+                }
                 if (this.ctx && this.ctx.state === 'suspended') { try { this.ctx.resume(); } catch(e){} }
             },
             stopAmbulance() {
@@ -279,29 +285,40 @@
                 this.engineType = type;
                 let t = this.ctx.currentTime;
                 this.engineGain = this.ctx.createGain();
-                this.engineGain.gain.value = 0.15;
+                this.engineGain.gain.value = 0.6; // slightly boosted for real audio
                 this.engineGain.connect(this.ctx.destination);
-                this.engineNode = this.ctx.createOscillator();
-                if (type === 'thump') {
-                    this.engineNode.type = 'sawtooth'; this.engineNode.frequency.value = 75;
-                    this.engineLFO = this.ctx.createOscillator(); this.engineLFO.type = 'square'; this.engineLFO.frequency.value = 10;
-                    let lfoGain = this.ctx.createGain(); lfoGain.gain.value = 35;
-                    this.engineLFO.connect(lfoGain); lfoGain.connect(this.engineNode.frequency);
-                    this.engineLFO.start(t);
-                    let filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1000;
-                    this.engineNode.connect(filter); filter.connect(this.engineGain);
-                } else if (type === 'fast') {
-                    this.engineNode.type = 'sawtooth'; this.engineNode.frequency.value = 240;
-                    let filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1500;
-                    this.engineNode.connect(filter); filter.connect(this.engineGain);
-                } else if (type === 'smooth') {
-                    this.engineNode.type = 'square'; this.engineNode.frequency.value = 120;
-                    let filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 600;
-                    this.engineNode.connect(filter); filter.connect(this.engineGain);
+                
+                if (type === 'thump' && this.customThumpBuf) {
+                    this.engineNode = this.ctx.createBufferSource();
+                    this.engineNode.buffer = this.customThumpBuf;
+                    this.engineNode.loop = true;
+                    // Filter out wind noise (highpass) and hiss (lowpass)
+                    let lp = this.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+                    let hp = this.ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 80;
+                    this.engineNode.connect(hp); hp.connect(lp); lp.connect(this.engineGain);
                 } else {
-                    this.engineNode.type = 'sawtooth'; this.engineNode.frequency.value = 120;
-                    let filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 900;
-                    this.engineNode.connect(filter); filter.connect(this.engineGain);
+                    this.engineNode = this.ctx.createOscillator();
+                    if (type === 'thump') {
+                        this.engineNode.type = 'sawtooth'; this.engineNode.frequency.value = 75;
+                        this.engineLFO = this.ctx.createOscillator(); this.engineLFO.type = 'square'; this.engineLFO.frequency.value = 10;
+                        let lfoGain = this.ctx.createGain(); lfoGain.gain.value = 35;
+                        this.engineLFO.connect(lfoGain); lfoGain.connect(this.engineNode.frequency);
+                        this.engineLFO.start(t);
+                        let filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1000;
+                        this.engineNode.connect(filter); filter.connect(this.engineGain);
+                    } else if (type === 'fast') {
+                        this.engineNode.type = 'sawtooth'; this.engineNode.frequency.value = 240;
+                        let filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1500;
+                        this.engineNode.connect(filter); filter.connect(this.engineGain);
+                    } else if (type === 'smooth') {
+                        this.engineNode.type = 'square'; this.engineNode.frequency.value = 120;
+                        let filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 600;
+                        this.engineNode.connect(filter); filter.connect(this.engineGain);
+                    } else {
+                        this.engineNode.type = 'sawtooth'; this.engineNode.frequency.value = 120;
+                        let filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 900;
+                        this.engineNode.connect(filter); filter.connect(this.engineGain);
+                    }
                 }
                 this.engineNode.start(t);
             },
@@ -1066,12 +1083,13 @@
                 if (this.mapId === 'hills') {
                     let baseCurve = this.getCurveOffset(this.p.logY);
 
-                    // --- 1. CONTINUOUS FULL-SCREEN SKY ---
-                    let skyGrad = this.ctx.createLinearGradient(0,0,0,800);
-                    skyGrad.addColorStop(0, '#1EA7E1'); 
-                    skyGrad.addColorStop(1, '#81D8D0'); 
-                    this.ctx.fillStyle = skyGrad; 
-                    this.ctx.fillRect(0, 0, 600, 800); // Fully covers back
+                    // --- COLORFUL MARIO KART STYLE BACKGROUND (Hills Only) ---
+
+                    // Vibrant Sky
+                    let skyGrad = this.ctx.createLinearGradient(0,0,0,300);
+                    skyGrad.addColorStop(0, '#1EA7E1'); // Bright Azure
+                    skyGrad.addColorStop(1, '#81D8D0'); // Tiffany Blue
+                    this.ctx.fillStyle = skyGrad; this.ctx.fillRect(0, 0, 600, 800);
 
                     // Puffy Cartoon Clouds
                     let cloudOffset = -(baseCurve * 0.05) % 600;
@@ -1086,71 +1104,69 @@
                         this.ctx.fill();
                     }
 
-                    // --- 2. FAR MOUNTAINS ---
+                    // Bright Distant Mountains (Natural Grey-Blue)
                     let mOffset1 = -(baseCurve * 0.1) % 400;
                     this.ctx.fillStyle = '#7C9AA6';
                     this.ctx.beginPath(); this.ctx.moveTo(0, 300 - fallDepthY);
                     for(let i=-2; i<6; i++) {
                         let mx = mOffset1 + (i*150);
-                        this.ctx.lineTo(mx + 75, 120 - (i%2*20) - fallDepthY);
+                        this.ctx.lineTo(mx + 75, 150 - (i%2*20) - fallDepthY);
                         this.ctx.lineTo(mx + 150, 300 - fallDepthY);
                     }
                     this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); this.ctx.fill();
 
-                    // --- 3. MID LAYER HILLS, RIVER, TREES (Continuous Cascade) ---
-                    let hillColors = ['#4A7C75', '#5ca03e', '#66bb4a', '#76FF03', '#64DD17', '#4CAF50', '#388E3C', '#2E7D32'];
-                    for (let layer = 0; layer < 8; layer++) {
-                        let hOffset = -(baseCurve * (0.15 + layer*0.1)) % 400; 
-                        let waveY = Math.sin((this.p.logY * 0.01) + layer) * 20; // Simulated undulating terrain instead of popping vertical wrap
-                        let baseHeight = 350 + layer * 70; // Stagger layered curves down to the absolute bottom
-                        
-                        this.ctx.fillStyle = hillColors[layer];
-                        this.ctx.strokeStyle = '#1b4a1b'; 
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath(); 
-                        
-                        this.ctx.moveTo(0, baseHeight + waveY - fallDepthY);
-                        for(let i=-2; i<5; i++) {
-                            let hx = hOffset + (i*400) + (layer*50);
-                            this.ctx.quadraticCurveTo(hx + 200, baseHeight - 120 + waveY - fallDepthY, hx + 400, baseHeight + waveY - fallDepthY);
-                        }
-                        this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
-                        this.ctx.fill(); this.ctx.stroke();
-
-                        // --- RIVER INTERWOVEN ---
-                        if (layer === 2) {
-                            let rOffset = -(baseCurve * 0.25) % 600;
-                            this.ctx.fillStyle = '#0CA4FF'; // Ocean water
-                            this.ctx.strokeStyle = '#5AD3FF'; this.ctx.lineWidth = 4;
-                            this.ctx.beginPath(); this.ctx.moveTo(0, baseHeight + waveY - fallDepthY);
-                            for(let i=-1; i<4; i++) {
-                                let rx = rOffset + (i*400);
-                                this.ctx.quadraticCurveTo(rx + 200, baseHeight - 80 + waveY - fallDepthY, rx + 400, baseHeight + waveY - fallDepthY);
-                            }
-                            this.ctx.lineTo(600, baseHeight + waveY + 40 - fallDepthY);
-                            for(let i=3; i>=-1; i--) {
-                                let rx = rOffset + (i*400);
-                                this.ctx.quadraticCurveTo(rx + 200, baseHeight - 40 + waveY - fallDepthY, rx, baseHeight + waveY + 40 - fallDepthY);
-                            }
-                            this.ctx.fill(); this.ctx.stroke();
-                        }
-
-                        // --- SCATTERED TREES INTERWOVEN ---
-                        let tOffset = -(baseCurve * (0.18 + layer*0.1)) % 250;
-                        let numTrees = 8 + (layer * 2); // get denser near bottom
-                        for(let i=-2; i<numTrees; i++) {
-                             let tx = tOffset + (i * (600/numTrees)) + (Math.sin(layer*i)*30);
-                             let ty = baseHeight + waveY - 20 - (Math.sin(i)*30) - fallDepthY;
-                             if (ty > 800 || ty < 300) continue;
-                             
-                             this.ctx.fillStyle = '#795548'; // Trunk
-                             this.ctx.fillRect(tx - 3, ty, 6, 20);
-                             this.ctx.fillStyle = '#00E676'; // Leaves Base
-                             this.ctx.beginPath(); this.ctx.arc(tx, ty - 10, 15, 0, Math.PI*2); this.ctx.fill();
-                             this.ctx.fillStyle = '#B2FF59'; // Leave Highlight
-                             this.ctx.beginPath(); this.ctx.arc(tx - 4, ty - 14, 6, 0, Math.PI*2); this.ctx.fill();
-                        }
+                    // Mid Mountains (Natural Blue-Green)
+                    let mOffset2 = -(baseCurve * 0.2) % 300;
+                    this.ctx.fillStyle = '#4A7C75'; 
+                    this.ctx.strokeStyle = '#38635C'; this.ctx.lineWidth = 4;
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 350 - fallDepthY);
+                    for(let i=-2; i<6; i++) {
+                        let mx = mOffset2 + (i*200);
+                        this.ctx.quadraticCurveTo(mx + 100, 180 - (i%2*30) - fallDepthY, mx + 200, 350 - fallDepthY);
                     }
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
+                    this.ctx.fill(); this.ctx.stroke();
+
+                    // Bright Cyan River
+                    let rOffset = -(baseCurve * 0.25) % 600;
+                    this.ctx.fillStyle = '#00E5FF';
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 360 - fallDepthY);
+                    for(let i=-1; i<3; i++) {
+                        let rx = rOffset + (i*400);
+                        this.ctx.quadraticCurveTo(rx + 200, 385 - fallDepthY, rx + 400, 360 - fallDepthY);
+                    }
+                    this.ctx.lineTo(600, 395 - fallDepthY); this.ctx.lineTo(0, 395 - fallDepthY); this.ctx.fill();
+
+                    // Mid Hills (Vibrant Lime Green with curved stroke)
+                    let hOffset = -(baseCurve * 0.5) % 400;
+                    this.ctx.fillStyle = '#76FF03'; 
+                    this.ctx.strokeStyle = '#64DD17'; this.ctx.lineWidth = 10;
+                    this.ctx.beginPath(); this.ctx.moveTo(0, 480 - fallDepthY);
+                    for(let i=-2; i<5; i++) {
+                        let hx = hOffset + (i*400);
+                        this.ctx.quadraticCurveTo(hx + 200, 250 - fallDepthY, hx + 400, 480 - fallDepthY);
+                    }
+                    this.ctx.lineTo(600, 800); this.ctx.lineTo(0, 800); 
+                    this.ctx.fill(); this.ctx.stroke();
+                    
+                    // Cartoon Lollipop Trees
+                    let fOffset = -(baseCurve * 0.8) % 200;
+                    for(let i=-5; i<25; i++) {
+                        let tx = fOffset + (i*40) + (Math.sin(i*7)*20);
+                        let ty = 400 + (Math.cos(i*3)*50) - fallDepthY;
+                        
+                        this.ctx.fillStyle = '#795548'; // Trunk
+                        this.ctx.fillRect(tx - 3, ty, 6, 20);
+                        
+                        this.ctx.fillStyle = '#00E676'; // Leaves Base
+                        this.ctx.beginPath(); this.ctx.arc(tx, ty - 10, 15, 0, Math.PI*2); this.ctx.fill();
+                        this.ctx.fillStyle = '#B2FF59'; // Leave Highlight
+                        this.ctx.beginPath(); this.ctx.arc(tx - 4, ty - 14, 6, 0, Math.PI*2); this.ctx.fill();
+                    }
+
+                    // Base Ground (Solid Vibrant Grass)
+                    this.ctx.fillStyle = '#4CAF50';
+                    this.ctx.fillRect(0, 450 - fallDepthY, 600, 800);
 
                     // Curved Road Polygon
                     this.ctx.fillStyle = '#111';
