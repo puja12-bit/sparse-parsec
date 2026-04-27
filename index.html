@@ -442,11 +442,11 @@
             hum1: gen(8, 8, dHum1, PALS.human), hum2: gen(8, 8, dHum2, PALS.human),
             tree: gen(20, 20, dTree, PALS.tree), shop: gen(30, 15, dShop, PALS.shop), house: gen(30, 20, dHouse, PALS.house),
             cow: gen(12, 12, dCow, PALS.cow), buffalo: gen(16, 16, dBuff, PALS.buffalo),
-            bike: gen(10,16, dBike, PALS.bike),
-            bikeBlue: gen(10,16, dBike, {1:'#0055ff', 2:'#00aaff', 3:'#fff', 4:'#111'}),
-            bikeBlack: gen(10,16, dBike, {1:'#222', 2:'#444', 3:'#fff', 4:'#000'}),
-            bikeGreen: gen(10,16, dBike, {1:'#00ff00', 2:'#55ff55', 3:'#fff', 4:'#111'}),
-            bmwBike: gen(10,16, dBike, {1:'#ffffff', 2:'#0033aa', 3:'#ff0022', 4:'#111'}),
+            bike: gen(16,24, dBike, {1:'#ff5500', 2:'#ffaa00', 3:'#ccffff', 4:'#111', 5:'#ff0000', 6:'#ff8800', 7:'#eee', 8:'#222'}),
+            bikeBlue: gen(16,24, dBike, {1:'#0055ff', 2:'#00ddff', 3:'#ccffff', 4:'#111', 5:'#ff0000', 6:'#ff8800', 7:'#eee', 8:'#222'}),
+            bikeBlack: gen(16,24, dBike, {1:'#222222', 2:'#00ddff', 3:'#ccffff', 4:'#0a0a0a', 5:'#ff0000', 6:'#ff8800', 7:'#eee', 8:'#111'}),
+            bikeGreen: gen(16,24, dBike, {1:'#00ff00', 2:'#aaff55', 3:'#ccffff', 4:'#111', 5:'#ff0000', 6:'#ff8800', 7:'#eee', 8:'#222'}),
+            bmwBike: gen(16,24, dBike, {1:'#ffffff', 2:'#0033aa', 3:'#ccffff', 4:'#111', 5:'#ff0000', 6:'#ff8800', 7:'#eee', 8:'#222'}),
             auto: gen(12,14, dAuto, PALS.auto),
             bwm: createBoxySprite(20, 36, '#ffffff', '#111', '#222'),
             bmwMSeries: createBMWMSeriesSprite(24, 40),
@@ -467,10 +467,10 @@
         let HAS_UNLOCKED_THIS_SESSION = false;
 
         const VEHICLES = [
-            { id: 'hjonda', tier: 'BIKE', name: 'HEROIC SPLENDID', cost: 0, s: 10, a: 0.05, sp: SPRITES.bikeBlue, w:10, h:16, eSound: null, fuelRate: 0.5 },
-            { id: 'bullett', tier: 'BIKE', name: 'BALLISTIC RANGER', cost: 500, s: 14, a: 0.08, sp: SPRITES.bikeBlack, w:10, h:18, eSound: 'thump', fuelRate: 1.5 },
-            { id: 'ninja', tier: 'BIKE', name: 'SHINOBI ZX', cost: 3000, s: 28, a: 0.40, sp: SPRITES.bikeGreen, w:10, h:16, eSound: null, fuelRate: 4.5 },
-            { id: 'bmw1000rr', tier: 'SUPERBIKE', name: 'BVM X1000R', cost: 0, s: 30, a: 0.28, sp: SPRITES.bmwBike, w:10, h:16, eSound: null, fuelRate: 4.0 }
+            { id: 'hjonda', tier: 'BIKE', name: 'HEROIC SPLENDID', cost: 0, s: 10, a: 0.05, sp: SPRITES.bikeBlue, w:16, h:24, eSound: null, fuelRate: 0.5 },
+            { id: 'bullett', tier: 'BIKE', name: 'BALLISTIC RANGER', cost: 500, s: 14, a: 0.08, sp: SPRITES.bikeBlack, w:16, h:24, eSound: 'thump', fuelRate: 1.5 },
+            { id: 'ninja', tier: 'BIKE', name: 'SHINOBI ZX', cost: 3000, s: 28, a: 0.40, sp: SPRITES.bikeGreen, w:16, h:24, eSound: null, fuelRate: 4.5 },
+            { id: 'bmw1000rr', tier: 'SUPERBIKE', name: 'BVM X1000R', cost: 0, s: 30, a: 0.28, sp: SPRITES.bmwBike, w:16, h:24, eSound: null, fuelRate: 4.0 }
         ];
 
         const MAPS = [
