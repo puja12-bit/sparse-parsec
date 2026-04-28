@@ -934,9 +934,9 @@
                             e.t = 'p'; e.sp1 = SPRITES.hum1; e.sp2 = SPRITES.hum2; e.w=8; e.h=8; e.sx = (Math.random()>0.5?1:-1) * 2; e.x = e.sx>0?100:500;
                             e.animT = 0; // custom animation timer logic per human
                         } else if (r < 0.95) { // V8 Flat Cow
-                            e.t = 'cow'; e.sp = SPRITES.cow; e.w=12; e.h=12; e.sx = (Math.random()>0.5?1:-1) * 0.2; e.x = e.sx>0?150:450;
+                            e.t = 'cow'; e.sp = SPRITES.cow; e.w=12; e.h=16; e.sx = (Math.random()>0.5?1:-1) * 0.2; e.x = e.sx>0?150:450;
                         } else { // V8 Flat Buffalo
-                            e.t = 'buf'; e.sp = SPRITES.buffalo; e.w=16; e.h=16; e.sx = (Math.random()>0.5?1:-1) * 0.1; e.x = e.sx>0?150:450; e.maxWait = 6000;
+                            e.t = 'buf'; e.sp = SPRITES.buffalo; e.w=16; e.h=20; e.sx = (Math.random()>0.5?1:-1) * 0.1; e.x = e.sx>0?150:450; e.maxWait = 6000;
                         }
                     }
                     this.em.push(e);
