@@ -1238,7 +1238,7 @@
                         this.ctx.drawImage(e.sp, e.x - e.w, sy - e.h, e.w*2, e.h*2); 
                     } else if (e.t === 'cow' || e.t === 'buf') {
                         this.ctx.shadowBlur = 0;
-                        this.ctx.drawImage(e.sp, e.x - (e.w*2.5)/2, sy - (e.h*2.5)/2, e.w*2.5, e.h*2.5);
+                        this.ctx.drawImage(e.sp, Math.floor(e.x - e.w), Math.floor(sy - e.h), e.w*2, e.h*2);
                     } else if (e.t === 'p') {
                         this.ctx.shadowBlur = 0;
                         const isF1 = (e.animT % 500) < 250;
