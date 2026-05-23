@@ -313,26 +313,42 @@
             bwm: createBoxySprite(20, 36, '#ffffff', '#111', '#222'), bus: createBoxySprite(30, 60, '#00ff66', '#222', '#111')
         };
 
-        let GLOBAL_SCORE = localStorage.getItem('v8_score') ? parseInt(localStorage.getItem('v8_score')) : 0;
-        let MAP_UNLOCKS = localStorage.getItem('v8_maps') ? parseInt(localStorage.getItem('v8_maps')) : 0;
-        let UNLOCKED_VEHICLES = localStorage.getItem('v8_vehicles') ? JSON.parse(localStorage.getItem('v8_vehicles')) : ['hjonda'];
+        
+        const ls = {
+            get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+            set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} }
+        };
+
+        let GLOBAL_SCORE = ls.get('v8_score') ? parseInt(ls.get('v8_score')) : 0;
+        let MAP_UNLOCKS = ls.get('v8_maps') ? parseInt(ls.get('v8_maps')) : 0;
+        let UNLOCKED_VEHICLES = ls.get('v8_vehicles') ? JSON.parse(ls.get('v8_vehicles')) : ['hjonda', 'bullett', 'ninja'];
+        if(!UNLOCKED_VEHICLES.includes('ninja')) {
+            UNLOCKED_VEHICLES.push('ninja'); ls.set('v8_vehicles', JSON.stringify(UNLOCKED_VEHICLES));
+        }
+        if(!UNLOCKED_VEHICLES.includes('bullett')) {
+            UNLOCKED_VEHICLES.push('bullett'); ls.set('v8_vehicles', JSON.stringify(UNLOCKED_VEHICLES));
+        }
 
         const VEHICLES = [
-            { id: 'hjonda', tier: 'BIKE', name: 'HJONDA SPLENDER', cost: 0, s: 12, a: 0.1, sp: SPRITES.bike, w:10, h:16 },
-            { id: 'bullett', tier: 'BIKE', name: 'BULLETT ENFIELD', cost: 500, s: 14, a: 0.08, sp: SPRITES.bike, w:10, h:18 },
-            { id: 'hindo', tier: 'CAR', name: 'HINDO I20', cost: 5000, s: 15, a: 0.15, sp: SPRITES.bwm, w:20, h:36 },
-            { id: 'bwm', tier: 'CAR', name: 'BWM M-SERIES', cost: 12000, s: 22, a: 0.25, sp: SPRITES.bwm, w:24, h:40 }
+            { id: 'hjonda', tier: 'BIKE', name: 'HEROIC SPLENDID', cost: 0, s: 10, a: 0.05, sp: SPRITES.bike, w:10, h:16, eSound: null, fuelRate: 0.5 },
+            { id: 'bullett', tier: 'BIKE', name: 'BALLISTIC RANGER', cost: 500, s: 14, a: 0.08, sp: SPRITES.bike, w:10, h:18, eSound: 'thump', fuelRate: 1.5 },
+            { id: 'ninja', tier: 'BIKE', name: 'SHINOBI ZX', cost: 3000, s: 28, a: 0.40, sp: SPRITES.bike, w:10, h:16, eSound: null, fuelRate: 4.5 },
+            { id: 'bmw1000rr', tier: 'SUPERBIKE', name: 'BVM X1000R', cost: 0, s: 30, a: 0.28, sp: SPRITES.bwm, w:10, h:16, eSound: null, fuelRate: 4.0 }
         ];
 
         const MAPS = [
-            { id: 'hyderabad', name: 'HYDERABAD BLOCKS', unlockCost: 0, levelReq: 0 },
-            { id: 'highway', name: 'NATIONAL HIGHWAY', unlockCost: 5000, levelReq: 1 }
+            { id: 'hyderabad', name: '🕌 HYDERABAD BLOCKS', unlockCost: 0, levelReq: 0 },
+            { id: 'offroad', name: '🌲 MP OFF-ROAD', unlockCost: 0, levelReq: 0 },
+            { id: 'delhi', name: '🛺 DELHI CHAOS', unlockCost: 0, levelReq: 0 },
+            { id: 'mumbai', name: '🌊 MUMBAI RUSH', unlockCost: 0, levelReq: 0 },
+            { id: 'tamilnadu', name: '🛕 TAMIL NADU FLOW', unlockCost: 0, levelReq: 0 },
+            { id: 'hills', name: '⛰️ EK GALTI HILLS', unlockCost: 0, levelReq: 0 }
         ];
 
         function saveProgress() {
-            localStorage.setItem('v8_score', GLOBAL_SCORE);
-            localStorage.setItem('v8_maps', MAP_UNLOCKS);
-            localStorage.setItem('v8_vehicles', JSON.stringify(UNLOCKED_VEHICLES));
+            ls.set('v8_score', GLOBAL_SCORE);
+            ls.set('v8_maps', MAP_UNLOCKS);
+            ls.set('v8_vehicles', JSON.stringify(UNLOCKED_VEHICLES));
         }
 
         class GameEngine {
